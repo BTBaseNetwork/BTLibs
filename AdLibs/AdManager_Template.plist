@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Heyzap</key>
+	<dict>
+		<key>Enabled</key>
+		<true/>
+		<key>HeyzapId</key>
+		<string>3bbb2281529aeadf3f47239b7664b5c4</string>
+	</dict>
+	<key>GDT</key>
+	<dict>
+		<key>Enabled</key>
+		<true/>
+		<key>AppId</key>
+		<string>1106321230</string>
+		<key>BannerId</key>
+		<string>1020027485399149</string>
+		<key>InstertitialId</key>
+		<string>7020825445495290</string>
+		<key>SplashId</key>
+		<string>5080223475590221</string>
+		<key>NativeId</key>
+		<string></string>
+		<key>Note</key>
+		<string>使用FlyingBall媒体位</string>
+	</dict>
+	<key>Admob</key>
+	<dict>
+		<key>Enabled</key>
+		<true/>
+		<key>AppId</key>
+		<string>ca-app-pub-7838252230258105~8878524074</string>
+		<key>BannerId</key>
+		<string>ca-app-pub-7838252230258105/9588970514</string>
+		<key>StaticId</key>
+		<string>ca-app-pub-7838252230258105/3752397896</string>
+		<key>VideoId</key>
+		<string>ca-app-pub-7838252230258105/1673029462</string>
+		<key>RewardedId</key>
+		<string>ca-app-pub-7838252230258105/3862001119</string>
+		<key>NativeId</key>
+		<string>ca-app-pub-7838252230258105/5838492724</string>
+		<key>GDPR</key>
+		<true/>
+		<key>Note</key>
+		<string>Admob配置</string>
+	</dict>
+</dict>
+</plist>
