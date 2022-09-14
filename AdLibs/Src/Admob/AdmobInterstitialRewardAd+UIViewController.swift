@@ -18,7 +18,7 @@ extension UIViewController{
     }
     
     func admobTryShowInterstitialRewardedAd(forcePresent:Bool = false) -> Bool {
-        if let config = AdmobConfig.fromAdManagerList(),let adUnitId = config.rewardedId{
+        if let config = AdmobConfig.fromAdManagerList(),let adUnitId = config.irewardedId{
             return admobTryShowInterstitialRewardedAd(adUnitId: adUnitId, forcePresent: forcePresent)
         }
         return false
@@ -27,17 +27,17 @@ extension UIViewController{
 
 extension AdManager{
     func admobLoadInterstitialRewardedAd() {
-        if let config = AdmobConfig.fromAdManagerList(),let adUnitId = config.rewardedId{
-            AdmobInterstitialRewardedAdManager.shared.createAndLoadRewardedAd(adUnitId)
+        if let config = AdmobConfig.fromAdManagerList(),let adUnitId = config.irewardedId{
+            AdmobInterstitialRewardedAdManager.shared.createAndLoadIRewardedAd(adUnitId)
         }
     }
     
     func admobLoadInterstitialRewardedAd(adUnitId:String) {
-        AdmobInterstitialRewardedAdManager.shared.createAndLoadRewardedAd(adUnitId)
+        AdmobInterstitialRewardedAdManager.shared.createAndLoadIRewardedAd(adUnitId)
     }
     
     func admobIsInterstitialRewardAdReady() -> Bool {
-        if let config = AdmobConfig.fromAdManagerList(),let adUnitId = config.rewardedId{
+        if let config = AdmobConfig.fromAdManagerList(),let adUnitId = config.irewardedId{
             return admobIsInterstitialRewardAdReady(adUnitId: adUnitId)
         }
         return false
@@ -59,6 +59,7 @@ private class AdmobInterstitialRewardedAdManager:NSObject, GADFullScreenContentD
     static let shared = AdmobInterstitialRewardedAdManager()
     
     private var cachedAds = [String:GADRewardedInterstitialAd]()
+    private var loadingAds = [String]()
     
     func isAdReady(adUnitId:String) -> Bool {
         if let _ = cachedAds[adUnitId]{
@@ -77,51 +78,63 @@ private class AdmobInterstitialRewardedAdManager:NSObject, GADFullScreenContentD
         return false
     }
     
-    func createAndLoadRewardedAd(_ adUnitID:String) {
+    func createAndLoadIRewardedAd(_ adUnitID:String) {
+        if loadingAds.contains(adUnitID) {
+            AdManager.dPrintMessage("createAndLoadIRewardedAd:\(adUnitID) Is Loading")
+            return
+        }else if cachedAds.keys.contains(adUnitID){
+            AdManager.dPrintMessage("createAndLoadIRewardedAd:\(adUnitID) Is Loaded")
+            return
+        }
+        AdManager.dPrintMessage("createAndLoadIRewardedAd:\(adUnitID)")
+        loadingAds.append(adUnitID)
         GADRewardedInterstitialAd.load(withAdUnitID: adUnitID, request: GADRequest()) { (loadedAd, error) in
+            self.loadingAds.removeAll { id in return id == adUnitID }
             if let err = error{
                 NotificationCenter.default.post(Notification(name: .admobFullScreenAdFailedToReceive, object: nil, userInfo: ["adunit" : adUnitID,"error":err]))
-                DispatchQueue.global().async {
-                    self.createAndLoadRewardedAd(adUnitID)
+                AdManager.dPrintMessage(err.localizedDescription)
+                DispatchQueue.main.afterMS(3000) {
+                    self.createAndLoadIRewardedAd(adUnitID)
                 }
             }else if let ad = loadedAd{
                 self.cachedAds[ad.adUnitID] = ad
+                ad.fullScreenContentDelegate = self
                 NotificationCenter.default.post(Notification(name: .admobFullScreenAdDidReceived, object: nil, userInfo: ["adunit" : adUnitID]))
+                AdManager.dPrintMessage("loaded irewarded ad:\(adUnitID)")
             }
         }
     }
     
     //MARK:GADFullScreenContentDelegate
     func adDidRecordImpression(_ ad: GADFullScreenPresentingAd) {
+        AdManager.dPrintMessage("irewardedad GADFullScreenPresentingAd")
         if let rad = ad as? GADRewardedInterstitialAd {
             NotificationCenter.default.post(Notification(name: .admobFullScreenAdDidRecordImpression, object: nil, userInfo: ["adunit" : rad.adUnitID]))
         }
     }
     
     func adWillPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+        AdManager.dPrintMessage("irewardedad GADFullScreenPresentingAd")
         if let rad = ad as? GADRewardedInterstitialAd {
             NotificationCenter.default.post(Notification(name: .admobFullScreenAdWillPresent, object: nil, userInfo: ["adunit" : rad.adUnitID]))
         }
     }
     
-    /*
-    func adDidPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        if let rad = ad as? GADRewardedInterstitialAd {
-            NotificationCenter.default.post(Notification(name: .admobFullScreenAdDidPresent, object: nil, userInfo: ["adunit" : rad.adUnitID]))
-        }
-    }*/
-    
     func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+        AdManager.dPrintMessage("irewardedad GADFullScreenPresentingAd")
         if let rad = ad as? GADRewardedInterstitialAd {
             NotificationCenter.default.post(Notification(name: .admobFullScreenAdDidDismiss, object: nil, userInfo: ["adunit" : rad.adUnitID]))
-            createAndLoadRewardedAd(rad.adUnitID)
+            cachedAds.removeValue(forKey: rad.adUnitID)
+            DispatchQueue.main.afterMS(3000) { self.createAndLoadIRewardedAd(rad.adUnitID) }
         }
     }
     
     func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+        AdManager.dPrintMessage("irewardedad didFailToPresentFullScreenContentWithError")
         if let rad = ad as? GADRewardedInterstitialAd {
             NotificationCenter.default.post(Notification(name: .admobFullScreenAdDidFailToPresent, object: nil, userInfo: ["adunit" : rad.adUnitID]))
-            createAndLoadRewardedAd(rad.adUnitID)
+            cachedAds.removeValue(forKey: rad.adUnitID)
+            DispatchQueue.main.afterMS(3000) { self.createAndLoadIRewardedAd(rad.adUnitID) }
         }
     }
 }

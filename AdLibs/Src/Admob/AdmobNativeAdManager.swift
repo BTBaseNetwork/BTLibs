@@ -49,13 +49,13 @@ class AdmobNativeAdManager : NSObject,GADAdLoaderDelegate{
                                options: [])
         adLoader.delegate = self
         adLoader.load(GADRequest())
-        dPrint("[AdmobNativeAdManager] Start Load New NativeAd, Cached:\(cachedAds.count)")
+        AdManager.dPrintMessage("Start Load New NativeAd, Cached:\(cachedAds.count)")
     }
     
     func adLoader(_ adLoader: GADAdLoader, didReceive nativeAd: GADNativeAd) {
         // A unified native ad has loaded, and can be displayed.
         cachedAds.append(nativeAd)
-        dPrint("[AdmobNativeAdManager] NativeAd Received, Cached:\(cachedAds.count)")
+        AdManager.dPrintMessage("NativeAd Received, Cached:\(cachedAds.count)")
     }
     
     func adLoader(_ adLoader: GADAdLoader, didFailToReceiveAdWithError error: Error) {
@@ -70,14 +70,14 @@ class AdmobNativeAdManager : NSObject,GADAdLoaderDelegate{
                 self.loadAds()
             }
         }else{
-            dPrint("[AdmobNativeAdManager] NativeAds DidFinishLoading, Cached:\(cachedAds.count)")
+            AdManager.dPrintMessage("NativeAds DidFinishLoading, Cached:\(cachedAds.count)")
         }
     }
     
     func popNativeAd() -> GADNativeAd? {
         let ad = cachedAds.popLast()
         
-        dPrint("[AdmobNativeAdManager] Pop NativeAd, Cached:\(cachedAds.count)")
+        AdManager.dPrintMessage("Pop NativeAd, Cached:\(cachedAds.count)")
         
         if cachedAds.count == 0 {
             loadAds()
@@ -95,7 +95,7 @@ class AdmobNativeAdManager : NSObject,GADAdLoaderDelegate{
             }
         }
         
-        dPrint("[AdmobNativeAdManager] Pop NativeAds, Cached:\(cachedAds.count)")
+        AdManager.dPrintMessage("Pop NativeAds, Cached:\(cachedAds.count)")
         
         if cachedAds.count == 0 {
             loadAds()

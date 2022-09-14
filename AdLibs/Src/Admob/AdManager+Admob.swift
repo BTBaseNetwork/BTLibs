@@ -28,8 +28,10 @@ class AdmobConfig {
     var staticId:String!
     var videoId:String!
     var rewardedId:String!
+    var irewardedId:String!
     var nativeId:String!
     var splashId:String!
+    var splashInterval:TimeInterval = 30
     var gdpr:Bool = true
 }
 
@@ -47,8 +49,10 @@ extension AdmobConfig{
             config.staticId = dict["StaticId"] as? String
             config.videoId = dict["VideoId"] as? String
             config.rewardedId = dict["RewardedId"] as? String
+            config.irewardedId = dict["IRewardedId"] as? String
             config.nativeId = dict["NativeId"] as? String
             config.splashId = dict["SplashId"] as? String
+            config.splashInterval = (dict["SplashInterval"] as? TimeInterval) ?? 30
             config.gdpr = dict["GDPR"] as? Bool ?? true
             
             if String.isNullOrWhiteSpace(config.appId){
@@ -72,7 +76,7 @@ extension AdManager{
         NotificationCenter.default.addObserver(forName: .adManagerConfigDidUpdated, object: nil, queue: nil) { (_) in
             if let config = AdmobConfig.fromAdManagerList(){
                 if admobEnabled && !config.enabled{
-                    dPrint("[AdManager] Admob Is Disabled")
+                    dPrintMessage("Admob Is Disabled")
                     admobEnabled = false
                 }else if admobEnabled && config.enabled{
                     initAdmob()
@@ -80,7 +84,7 @@ extension AdManager{
             }
         }
         
-        dPrint("[AdManager] Add Admob")
+        dPrintMessage("Add Admob")
     }
     
     static func isAdmobEnabled() -> Bool{
@@ -97,18 +101,17 @@ extension AdManager{
                 admobEnabled = true
                 admobInited = false
                 GADMobileAds.sharedInstance().start { (status) in
-                    AdManager.shared.admobLoadInterstitialAds()
-                    AdManager.shared.admobLoadInterstitialRewardedAd()
                     admobInited = true
                     NotificationCenter.default.post(Notification(name: .admobDidInited, object: nil, userInfo: nil))
+                    dPrintMessage("Admob inited")
                 }
             }else{
                 admobEnabled = false
-                dPrint("[AdManager] Admob Is Disable")
+                dPrintMessage("Admob Is Disable")
             }
         }else{
             admobEnabled = false
-            dPrint("[AdManager] Admob Config Not Exists")
+            dPrintMessage("Admob Config Not Exists")
         }
     }
 }

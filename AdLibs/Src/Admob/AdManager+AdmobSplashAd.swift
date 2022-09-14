@@ -29,35 +29,36 @@ fileprivate class AdmobAppOpenAdManager:NSObject,GADFullScreenContentDelegate{
     private var resumeAdWindow:UIWindow!
     func adWillPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
         self.lastSplashPresented = Date()
-        dPrint("[AdmobAppOpenAdManager] Splash Ad Will Present")
+        AdManager.dPrintMessage("Splash Ad Will Present")
     }
     
-    /*
-    func adDidPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        self.lastSplashPresented = Date()
-        dPrint("[AdmobAppOpenAdManager] Splash Ad Did Presented")
-    }*/
-    
     func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        dPrint("[AdmobAppOpenAdManager] Splash Ad adDidDismissFullScreenContent")
+        AdManager.dPrintMessage("Splash Ad adDidDismissFullScreenContent")
+        DispatchQueue.main.afterMS(1000) {
+            _ = self.requestAppOpenAd()
+        }
     }
     
     func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        dPrint("[AdmobAppOpenAdManager] Splash Ad didFailToPresentFullScreenContentWithError")
+        AdManager.dPrintMessage("Splash Ad didFailToPresentFullScreenContentWithError")
+        DispatchQueue.main.afterMS(1000) {
+            _ = self.requestAppOpenAd()
+        }
     }
     
     private func requestAppOpenAd() -> Bool{
         self.appOpenAd = nil
         if let config = AdmobConfig.fromAdManagerList(),config.enabled ,let adUnitId = config.splashId{
+            self.resumeAdMinInterval = config.splashInterval
             let req = GADRequest()
-            
+            AdManager.dPrintMessage("start load splash ad:\(adUnitId)")
             GADAppOpenAd.load(withAdUnitID: adUnitId, request: req, orientation: UIInterfaceOrientation.unknown) { (openAd, error) in
                 if let err = error{
-                    dPrint("[AdmobAppOpenAdManager] Load OpenAd Error:\(err.localizedDescription)")
+                    AdManager.dPrintMessage("Load OpenAd Error:\(err.localizedDescription)")
                 }else{
                     self.appOpenAd = openAd
                     self.appOpenAd?.fullScreenContentDelegate = self
-                    dPrint("[AdmobAppOpenAdManager] OpenAd Loaded")
+                    AdManager.dPrintMessage("OpenAd Loaded")
                 }
             }
             return true
@@ -69,9 +70,7 @@ fileprivate class AdmobAppOpenAdManager:NSObject,GADFullScreenContentDelegate{
     
     private func tryPresentAppOpenAd(rootVC:UIViewController) -> Bool {
         if let ad = self.appOpenAd {
-            self.appOpenAd = nil
             ad.present(fromRootViewController: rootVC)
-            _ = requestAppOpenAd()
             return true
         }else{
             _ = requestAppOpenAd()
@@ -84,11 +83,10 @@ fileprivate class AdmobAppOpenAdManager:NSObject,GADFullScreenContentDelegate{
         return lastSplashPresented
     }
     
-    func setupAppResumeAd(mainWindow:UIWindow,adMinTimeInterval:TimeInterval) {
+    func setupAppResumeAd(mainWindow:UIWindow) {
         let notSetup = self.resumeAdWindow == nil
         
         self.resumeAdWindow = mainWindow
-        self.resumeAdMinInterval = adMinTimeInterval
         
         if notSetup {
             NotificationCenter.default.addObserver(self, selector: #selector(onAppResume), name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -98,13 +96,13 @@ fileprivate class AdmobAppOpenAdManager:NSObject,GADFullScreenContentDelegate{
     
     func enableAppResumeAd(enabled:Bool) {
         canPresentResumeAd = enabled
-        dPrint("[AdmobAppOpenAdManager] Resume Ad Enabled:\(enabled)")
+        AdManager.dPrintMessage("Resume Ad Enabled:\(enabled)")
     }
     
     @objc private func onEnterBackground(n:Notification){
         NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
         didEnterBackgroundOnce = true
-        dPrint("[AdmobAppOpenAdManager] Resume Ad EnterBackgroundOnce:\(didEnterBackgroundOnce)")
+        AdManager.dPrintMessage("Resume Ad EnterBackgroundOnce:\(didEnterBackgroundOnce)")
     }
     
     @objc private func onAppResume(n:Notification){
@@ -113,7 +111,7 @@ fileprivate class AdmobAppOpenAdManager:NSObject,GADFullScreenContentDelegate{
             if adDuration > resumeAdMinInterval {
                 _ = tryPresentAppOpenAd(rootVC: vc)
             }else{
-                dPrint("[AdmobAppOpenAdManager] Ad Duration Limited:\(adDuration) < \(resumeAdMinInterval)")
+                AdManager.dPrintMessage("Ad Duration Limited:\(adDuration) < \(resumeAdMinInterval)")
             }
         }
     }
@@ -121,7 +119,7 @@ fileprivate class AdmobAppOpenAdManager:NSObject,GADFullScreenContentDelegate{
     func showAppStartSplashAd(window:UIWindow,fetchDelay:Int = 3, launchScrBoardId:String = "LaunchScreen",vcId:String = "LaunchScreen") {
         
         if appStartAdCalled {
-            dPrint("[AdmobAppOpenAdManager] App Start Splash Ad Can Only Call Onece")
+            AdManager.dPrintMessage("App Start Splash Ad Can Only Call Onece")
             return
         }
         
@@ -132,17 +130,17 @@ fileprivate class AdmobAppOpenAdManager:NSObject,GADFullScreenContentDelegate{
         }
         
         guard let admobconfig = AdmobConfig.fromAdManagerList(),admobconfig.enabled else {
-            dPrint("[AdmobAppOpenAdManager] Admob Is Disable")
+            AdManager.dPrintMessage("Admob Is Disable")
             return
         }
         
         guard !String.isNullOrWhiteSpace(admobconfig.appId)  else {
-            dPrint("[AdmobAppOpenAdManager] Admob App Is Empty")
+            AdManager.dPrintMessage("Admob App Is Empty")
             return
         }
         
         guard !String.isNullOrWhiteSpace(admobconfig.splashId)  else {
-            dPrint("[AdmobAppOpenAdManager] Admob SplashAd ID Is Empty")
+            AdManager.dPrintMessage("Admob SplashAd ID Is Empty")
             return
         }
         
@@ -157,7 +155,7 @@ fileprivate class AdmobAppOpenAdManager:NSObject,GADFullScreenContentDelegate{
                 self.checkAdLoadedTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: timerTick)
             }
         }else{
-            dPrint("[AdmobAppOpenAdManager] Admob Is Not Ready, Waiting Admob Ready")
+            AdManager.dPrintMessage("Admob Is Not Ready, Waiting Admob Ready")
             cacheKeyWindowAndVC(window: window)
             setLaunchScreenBackground(window: window, launchScrBoardId: launchScrBoardId, vcId: vcId)
             splashCancelDate = Date().addSeconds(TimeInterval(fetchDelay + AdmobAppOpenAdManager.admobInitDelay))
@@ -176,7 +174,7 @@ fileprivate class AdmobAppOpenAdManager:NSObject,GADFullScreenContentDelegate{
             timer.invalidate()
             self.checkAdLoadedTimer = nil
             if self.requestAppOpenAd(){
-                dPrint("[AdmobAppOpenAdManager] Admob Is Ready, Start Loading SplashAd")
+                AdManager.dPrintMessage("Admob Is Ready, Start Loading SplashAd")
                 self.checkAdLoadedTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: timerTick)
             }else{
                 self.tryResetRootVC()
@@ -237,8 +235,8 @@ extension AdManager{
         AdmobAppOpenAdManager.shared.showAppStartSplashAd(window: window, fetchDelay: fetchDelay, launchScrBoardId: launchScrBoardId, vcId: vcId)
     }
     
-    func admobSetupAppResumeAd(mainWindow:UIWindow, adMinTimeInterval:TimeInterval,enabled:Bool) {
-        AdmobAppOpenAdManager.shared.setupAppResumeAd(mainWindow: mainWindow, adMinTimeInterval: adMinTimeInterval)
+    func admobSetupAppResumeAd(mainWindow:UIWindow, enabled:Bool) {
+        AdmobAppOpenAdManager.shared.setupAppResumeAd(mainWindow: mainWindow)
         AdmobAppOpenAdManager.shared.enableAppResumeAd(enabled: enabled)
     }
     

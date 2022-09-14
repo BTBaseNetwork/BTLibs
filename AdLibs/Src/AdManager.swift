@@ -35,8 +35,8 @@ class AdManager: NSObject {
 
     static func start() {
         #if DEBUG
-        dPrint("[AdManager] AdIdentifier:\(advertisingId)")
-        dPrint("[AdManager] AdIdentifierMd5:\(advertisingIdMD5)")
+        dPrintMessage("[AdManager] AdIdentifier:\(advertisingId)")
+        dPrintMessage("[AdManager] AdIdentifierMd5:\(advertisingIdMD5)")
         #endif
         if #available(iOS 14, *) {
             //Request IDFA
@@ -53,5 +53,9 @@ class AdManager: NSObject {
         }
         
 
+    }
+    
+    static func dPrintMessage(_ message:String?) {
+        dPrint("[AdManager] \(message ?? "Empty Message")")
     }
 }
