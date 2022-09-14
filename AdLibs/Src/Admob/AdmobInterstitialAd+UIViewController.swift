@@ -115,12 +115,17 @@ private class AdmobInterstitialAdManager:NSObject,GADFullScreenContentDelegate {
             NotificationCenter.default.post(Notification(name: .admobFullScreenAdDidRecordImpression, object: nil, userInfo: ["adunit" : iad.adUnitID]))
         }
     }
-    
+    func adWillPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+        if let iad = ad as? GADInterstitialAd {
+            NotificationCenter.default.post(Notification(name: .admobFullScreenAdWillPresent, object: nil, userInfo: ["adunit" : iad.adUnitID]))
+        }
+    }
+    /*
     func adDidPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
         if let iad = ad as? GADInterstitialAd {
             NotificationCenter.default.post(Notification(name: .admobFullScreenAdDidPresent, object: nil, userInfo: ["adunit" : iad.adUnitID]))
         }
-    }
+    }*/
     
     func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
         if let iad = ad as? GADInterstitialAd {

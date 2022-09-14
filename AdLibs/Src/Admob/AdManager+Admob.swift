@@ -14,7 +14,7 @@ extension Notification.Name{
     static let admobFullScreenAdDidReceived = Notification.Name(rawValue: "admobFullScreenAdDidReceived")
     static let admobFullScreenAdFailedToReceive = Notification.Name(rawValue: "admobFullScreenAdFailedToReceive")
     static let admobFullScreenAdDidRecordImpression = Notification.Name(rawValue: "admobFullScreenAdDidRecordImpression")
-    static let admobFullScreenAdDidPresent = Notification.Name(rawValue: "admobFullScreenAdDidPresent")
+    static let admobFullScreenAdWillPresent = Notification.Name(rawValue: "admobFullScreenAdWillPresent")
     static let admobFullScreenAdDidFailToPresent = Notification.Name(rawValue: "admobFullScreenAdDidFailToPresent")
     static let admobFullScreenAdDidDismiss = Notification.Name(rawValue: "admobFullScreenAdDidDismiss")
     

@@ -46,7 +46,7 @@ extension UIViewController {
         } else if !bannerAds.keys.contains(self.description) {
             bannerAds[self.description] = nil
             // In this case, we instantiate the banner with desired ad size.
-            let bannerView = GADBannerView(adSize: kGADAdSizeBanner)
+            let bannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait)
             addBannerViewToView(bannerView)
         }
     }

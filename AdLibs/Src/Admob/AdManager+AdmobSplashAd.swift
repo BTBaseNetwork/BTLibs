@@ -27,11 +27,16 @@ fileprivate class AdmobAppOpenAdManager:NSObject,GADFullScreenContentDelegate{
     
     private var resumeAdMinInterval:TimeInterval = -1
     private var resumeAdWindow:UIWindow!
+    func adWillPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+        self.lastSplashPresented = Date()
+        dPrint("[AdmobAppOpenAdManager] Splash Ad Will Present")
+    }
     
+    /*
     func adDidPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
         self.lastSplashPresented = Date()
         dPrint("[AdmobAppOpenAdManager] Splash Ad Did Presented")
-    }
+    }*/
     
     func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
         dPrint("[AdmobAppOpenAdManager] Splash Ad adDidDismissFullScreenContent")

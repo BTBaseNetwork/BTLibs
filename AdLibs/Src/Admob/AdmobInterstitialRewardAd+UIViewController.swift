@@ -98,11 +98,18 @@ private class AdmobInterstitialRewardedAdManager:NSObject, GADFullScreenContentD
         }
     }
     
+    func adWillPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+        if let rad = ad as? GADRewardedInterstitialAd {
+            NotificationCenter.default.post(Notification(name: .admobFullScreenAdWillPresent, object: nil, userInfo: ["adunit" : rad.adUnitID]))
+        }
+    }
+    
+    /*
     func adDidPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
         if let rad = ad as? GADRewardedInterstitialAd {
             NotificationCenter.default.post(Notification(name: .admobFullScreenAdDidPresent, object: nil, userInfo: ["adunit" : rad.adUnitID]))
         }
-    }
+    }*/
     
     func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
         if let rad = ad as? GADRewardedInterstitialAd {
